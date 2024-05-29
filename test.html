@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine learning Final</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+    canvas {
+        border: 1px solid #000;
+    }
+</style>
+</head>
+<body>
+<canvas id="Canvas" width="400" height="400"></canvas>
+<button onclick="startListening()">Start Voice Command</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands"></script>
+<script>
+    const canvas = document.getElementById('Canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Initial positions
+    let ballX = 300, ballY = 300, boxX = 50, boxY = 50;
+
+    // Draw the ball and the box
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeRect(boxX, boxY, 200, 200); // Draw the box
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, 20, 0, 2 * Math.PI); // Draw the ball
+        ctx.fillStyle = 'red';
+        ctx.fill();
+    }
+
+    // Initial draw
+    draw();
+
+    // Move the ball to the box
+    function moveBallToBox() {
+        ballX = boxX + 100;
+        ballY = boxY + 100;
+        draw();
+    }
+
+    // Start listening for voice commands
+    async function startListening() {
+        const recognizer = speechCommands.create('BROWSER_FFT');
+        await recognizer.ensureModelLoaded();
+        alert("Model loaded. Say 'go' to move the ball.");
+
+        recognizer.listen(result => {
+            const command = recognizer.wordLabels()[result.scores.indexOf(Math.max(...result.scores))];
+            if (command === 'go') {
+                alert("Move command detected");
+                moveBallToBox();
+            } else {
+                alert(`Detected command: ${command}`);
+            }
+        }, { probabilityThreshold: 0.75 });
+    }
+</script>
+</body>
+</html>
